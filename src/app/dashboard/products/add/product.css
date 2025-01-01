@@ -1,0 +1,122 @@
+.mysite {
+    padding: 2rem;
+    min-height: calc(80vh - 80px);
+    background-color: #f7f7f7; /* Slightly lighter for a more modern look */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.postform {
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+.upload-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    border: 2px dashed #ccc;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.upload-box:hover {
+    background-color: #f0f0f0;
+}
+.upload-item img {
+    width: 50px;
+    margin-bottom: 10px;
+}
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.error {
+    color: #d9534f;
+    font-size: 0.875rem;
+}
+.submit-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 14px 0;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+.submit-btn:hover {
+    background-color: #45a049;
+}
+.submit-btn:disabled {
+    background-color: #d1d1d1;
+    cursor: not-allowed;
+}
+.grid-cols-1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+.grid-cols-1.sm\:grid-cols-2 {
+    @media screen and (min-width: 640px) {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3 {
+    @media screen and (min-width: 1024px) {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+}
+select {
+    background-color: white;
+}
+textarea {
+    min-height: 120px;
+}
+.accordion-summary {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+.accordion-details {
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
