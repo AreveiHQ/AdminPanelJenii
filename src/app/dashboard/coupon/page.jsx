@@ -21,6 +21,23 @@ export default function CouponsPage() {
   const [activeCoupons, setActiveCoupons] = useState(0);
   const [expiredCoupons, setExpiredCoupons] = useState(0);
   const [showForm, setShowForm] = useState(false);
+  const [filter, setFilter] = useState("All");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+
+  
+  const filteredCoupons = coupons.filter((coupon) => {
+    if (filter === "All") return true;
+    return coupon.status === filter;
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredCoupons.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedCoupons = filteredCoupons.slice(startIndex, endIndex);
 
   const {
     register,
@@ -33,70 +50,67 @@ export default function CouponsPage() {
 
   // Fetch coupons and categorize them on component mount
 
- useEffect(() => {
-   async function fetchCoupons() {
-     try {
-       const res = await fetch("/api/coupons");
+  useEffect(() => {
+    async function fetchCoupons() {
+      try {
+        const res = await fetch("/api/coupons");
 
-       if (!res.ok) {
-         throw new Error("Failed to fetch coupons.");
-       }
+        if (!res.ok) {
+          throw new Error("Failed to fetch coupons.");
+        }
 
-       const coupons = await res.json();
+        const coupons = await res.json();
 
-       const now = new Date();
-       const categorizedCoupons = coupons.map((coupon) => ({
-         ...coupon,
-         status: new Date(coupon.validUntil) < now ? "Expired" : "Active",
-       }));
+        const now = new Date();
+        const categorizedCoupons = coupons.map((coupon) => ({
+          ...coupon,
+          status: new Date(coupon.validUntil) < now ? "Expired" : "Active",
+        }));
 
-       setCoupons(categorizedCoupons);
-       setTotalCoupons(categorizedCoupons.length);
-       setActiveCoupons(
-         categorizedCoupons.filter((coupon) => coupon.status === "Active")
-           .length
-       );
-       setExpiredCoupons(
-         categorizedCoupons.filter((coupon) => coupon.status === "Expired")
-           .length
-       );
-     } catch (error) {
-       console.error("Error fetching coupons:", error);
-     }
-   }
+        setCoupons(categorizedCoupons);
+        setTotalCoupons(categorizedCoupons.length);
+        setActiveCoupons(
+          categorizedCoupons.filter((coupon) => coupon.status === "Active")
+            .length
+        );
+        setExpiredCoupons(
+          categorizedCoupons.filter((coupon) => coupon.status === "Expired")
+            .length
+        );
+      } catch (error) {
+        console.error("Error fetching coupons:", error);
+      }
+    }
 
-   fetchCoupons();
- }, []);
-
-
+    fetchCoupons();
+  }, []);
 
   // Handle form submission
   const onSubmit = async (data) => {
-   
+    try {
+      const response = await fetch("/api/coupons", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-     try {
-       const response = await fetch("/api/coupons", {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json",
-         },
-         body: JSON.stringify(data),
-       });
+      if (!response.ok) {
+        throw new Error("Failed to create coupon.");
+      }
 
-       if (!response.ok) {
-         throw new Error("Failed to create coupon.");
-       }
+      const newCoupon = await response.json();
 
-       const newCoupon = await response.json();
-
-       // After adding, update the coupon list
-       setCoupons((prevCoupons) => [...prevCoupons, newCoupon]);
-       setShowForm(false); // Hide form after submitting
-       reset(); // Reset form inputs
-     } catch (error) {
-       console.error("Error creating coupon:", error);
-     }
+      // After adding, update the coupon list
+      setCoupons((prevCoupons) => [...prevCoupons, newCoupon]);
+      setShowForm(false); // Hide form after submitting
+      reset(); // Reset form inputs
+    } catch (error) {
+      console.error("Error creating coupon:", error);
+    }
   };
+
 
   return (
     <div className="container mx-auto p-4">
@@ -131,9 +145,54 @@ export default function CouponsPage() {
           <span className="text-pink-500">({totalCoupons} Coupons)</span>
         </h3>
         <div className="flex items-center gap-4">
-          <button className="flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100">
-            <img className="w-4" src="/filter.png" alt="filter" /> Filters
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowDropdown((prev) => !prev)}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100"
+            >
+              <img className="w-4" src="/filter.png" alt="filter" /> Filters
+            </button>
+
+            {/* Dropdown */}
+            {showDropdown && (
+              <div className="absolute mt-2 bg-white shadow-lg rounded-lg border border-gray-200 z-10">
+                <button
+                  onClick={() => {
+                    setFilter("All");
+                    setShowDropdown(false);
+                  }}
+                  className={`block px-4 py-2 text-gray-600 hover:bg-gray-100 w-full text-left ${
+                    filter === "All" ? "bg-gray-100 font-semibold" : ""
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => {
+                    setFilter("Active");
+                    setShowDropdown(false);
+                  }}
+                  className={`block px-4 py-2 text-gray-600 hover:bg-gray-100 w-full text-left ${
+                    filter === "Active" ? "bg-gray-100 font-semibold" : ""
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  onClick={() => {
+                    setFilter("Expired");
+                    setShowDropdown(false);
+                  }}
+                  className={`block px-4 py-2 text-gray-600 hover:bg-gray-100 w-full text-left ${
+                    filter === "Expired" ? "bg-gray-100 font-semibold" : ""
+                  }`}
+                >
+                  Expired
+                </button>
+              </div>
+            )}
+          </div>
+
           <button
             className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600"
             onClick={() => setShowForm(!showForm)}
@@ -143,8 +202,9 @@ export default function CouponsPage() {
         </div>
       </div>
 
+      
       {/* Coupons Table */}
-      <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+      <div className="bg-white shadow-md rounded-lg overflow-x-auto mt-4">
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>
@@ -166,7 +226,7 @@ export default function CouponsPage() {
             </tr>
           </thead>
           <tbody>
-            {coupons.map((coupon, idx) => (
+            {paginatedCoupons.map((coupon, idx) => (
               <tr key={idx} className="border-b">
                 <td className="px-6 py-3">{coupon.code}</td>
                 <td className="px-6 py-3">{coupon.discountType}</td>
@@ -189,43 +249,8 @@ export default function CouponsPage() {
                   </span>
                 </td>
                 <td className="px-6 py-3 flex items-center gap-2">
-                  <button>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                      />
-                    </svg>
-                  </button>
-                  <button>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                      />
-                    </svg>
-                  </button>
+                  <button>Edit</button>
+                  <button>Delete</button>
                 </td>
               </tr>
             ))}
@@ -233,16 +258,35 @@ export default function CouponsPage() {
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination Controls */}
       <div className="flex justify-between items-center mt-4">
         <p className="text-sm text-gray-600">
-          Showing 1-5 from {coupons.length}
+          Showing {startIndex + 1}-{Math.min(endIndex, filteredCoupons.length)}{" "}
+          of {filteredCoupons.length}
         </p>
         <div className="flex items-center gap-2">
-          <button className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 border border-gray-300 rounded-lg ${
+              currentPage === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
             Previous
           </button>
-          <button className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100">
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 border border-gray-300 rounded-lg ${
+              currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
             Next
           </button>
         </div>

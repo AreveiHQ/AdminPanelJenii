@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ImagePlus, Save, Send } from "lucide-react";
+import { FileVideoIcon, ImagePlus, Save, Send } from "lucide-react";
 import { productSchema } from "@/lib/validations/product";
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -12,12 +12,14 @@ import Typography from '@mui/material/Typography';
 import { FaArrowDown } from "react-icons/fa";
 import { useForm, Controller } from "react-hook-form";
 import { collectionsList } from "@/utils/data";
-import Select from 'react-select';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from 'axios';
 
+import dynamic from 'next/dynamic';
+import JoditEditor from "jodit-react";
 
+const Select = dynamic(() => import('react-select'), { ssr: false });
 export default function AddProduct() {
   const {
     register,
@@ -26,6 +28,7 @@ export default function AddProduct() {
     formState: { errors },
     setValue,
     watch,
+    trigger,
     reset, // Added reset here
   } = useForm({
     resolver: yupResolver(productSchema),
@@ -45,23 +48,40 @@ export default function AddProduct() {
   const categories = ['men', 'women'];
   const price = watch('price');
   const discountPrice = watch('discountPrice');
-
+  const [videoPreview, setVideoPreview] = useState(null);
+  const [preview, setPreview] = useState([]);
   const fileInput = useRef(null);
+  const vedioInput = useRef(null);
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
+      const previewsURL = files.map((file) => URL.createObjectURL(file));
       const updatedFiles = [...images, ...files];
+      setPreview((prevPreviews) => [...prevPreviews, ...previewsURL]);
       setImages(updatedFiles);
       setValue('images', updatedFiles);
+      trigger("images")
     }
+  };
+  const handleVideoChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setVideoPreview(URL.createObjectURL(file));
+      setValue("video",file)
+    }
+    trigger("video")
   };
 
   const removeImage = (index) => {
     const updatedImages = images.filter((_, idx) => idx !== index);
+    const filteredpreview = preview.filter((_,ind) => ind !== index);
     setImages(updatedImages);
     setValue('images', updatedImages);
+    setPreview(filteredpreview);
+    trigger("images")
   };
+
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -85,10 +105,10 @@ export default function AddProduct() {
       (category) => category.parentCategory === selectedCategory
     );
     setSubCategories(filteredSubCategories);
+    trigger("category")
   };
 
   const onSubmit = async (data) => {
-    console.log(data)
     try {
       setLoading(true);
       console.log('Form Submitted:', data);
@@ -105,6 +125,7 @@ export default function AddProduct() {
       formData.append("stock", data.stock);
       formData.append("metal", data.metal);
       formData.append("mode", data.mode);
+      formData.append("video", data.video);
 
       data.selectedCollections.forEach((coll) => {
         formData.append("collections", coll.value); // Access the value directly
@@ -126,6 +147,8 @@ export default function AddProduct() {
 
       reset(); // Reset the form after submission
       setLoading(false);
+      setVideoPreview(null)
+      setPreview([])
     } catch (error) {
       setLoading(false);
       toast.error(
@@ -191,12 +214,13 @@ export default function AddProduct() {
                   <label htmlFor="description" className="block text-sm font-medium">
                     Description
                   </label>
-                  <textarea
-                    id="description"
-                    {...register("description")}
-                    className="mt-1 w-full p-2 border rounded text-sm"
-                    rows={5}
-                  ></textarea>
+                  <Controller
+                    name="description"
+                    control={control}
+                    render={({ field }) => (
+                      <JoditEditor value={field.value} onChange={field.onChange} />
+                    )}
+                  />
                   {errors.description && (
                     <p className="text-red-500 text-sm">{errors.description.message}</p>
                   )}
@@ -217,7 +241,8 @@ export default function AddProduct() {
                                             accept="image/jpg,image/jpeg,image/png"
                                             multiple
                                             hidden
-                                            onChange={handleImageChange}
+                                            onChange={(e)=>{ field.onChange(e)
+                                              handleImageChange(e)}}
                                         />
                                     )}
                                 />
@@ -231,16 +256,16 @@ export default function AddProduct() {
                                 <p className="text-red-500 text-sm">{errors.images.message}</p>
                             )}
                 
-                            {images.length > 0 && (
+                            {preview.length > 0 && (
                                 <div className="flex gap-4 overflow-x-auto py-4">
-                                    {images.map((image, index) => (
+                                    {preview.map((image, index) => (
                                         <div
                                             key={index}
                                             className="relative min-w-[8rem] h-32"
                                             onClick={() => removeImage(index)}
                                         >
                                             <Image
-                                                src={URL.createObjectURL(image)}
+                                                src={image}
                                                 alt={`Preview ${index + 1}`}
                                                 fill
                                                 className="object-cover rounded-lg"
@@ -248,6 +273,46 @@ export default function AddProduct() {
                                         </div>
                                     ))}
                                 </div>
+                            )}
+                        </div>
+                <div className="space-y-4">
+                            <div
+                                className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary cursor-pointer transition-colors"
+                                onClick={() => vedioInput.current?.click()}
+                            >
+                               <Controller
+                                    name="video"
+                                    control={control}
+                                    render={({ field }) => (
+                                      <input
+                                      type="file"
+                                      id="video"
+                                      ref={vedioInput}
+                                      accept="video/*"
+                                      hidden
+                                      onChange={handleVideoChange}
+                                    />
+                                    )}
+                                />
+                              
+                                <FileVideoIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    click to upload Vedio
+                                </p>
+                            </div>
+                            {videoPreview && (
+        <div>
+          <h3>Video Preview:</h3>
+          <video
+            controls
+            src={videoPreview}
+            style={{ maxWidth: '100%', maxHeight: '400px' }}
+          />
+        </div>
+      )}
+                
+                            {errors.video && (
+                                <p className="text-red-500 text-sm">{errors.video.message}</p>
                             )}
                         </div>
               </div>
@@ -308,6 +373,7 @@ export default function AddProduct() {
                       id="price"
                       type="number"
                       className="mt-1 w-full p-2 border rounded text-sm"
+                      step="0.01" // Allows decimal input
                       {...register('price')}
                     />
                     {errors.price && <p className="text-red-500 text-sm">{errors.price.message}</p>}
@@ -319,6 +385,7 @@ export default function AddProduct() {
                     <input
                       id="discountPrice"
                       type="number"
+                      step="0.01" // Allows decimal input
                       className="mt-1 w-full p-2 border rounded text-sm"
                       {...register('discountPrice')}
                     />

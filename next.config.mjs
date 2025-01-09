@@ -20,6 +20,10 @@ const nextConfig = {eslint: {
           protocol: "https",
           hostname: "jenii.s3.eu-north-1.amazonaws.com",
         },
+        {
+          protocol: "https",
+          hostname: "jenii-storage.s3.ap-south-1.amazonaws.com",
+        },
       ],
     },experimental: {
       optimizePackageImports: ['@mantine/core', '@mantine/hooks'],

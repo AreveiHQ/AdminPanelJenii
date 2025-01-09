@@ -35,6 +35,8 @@ export const productSchema = Yup.object().shape({
             return true;
         })
         .test("required", "Please upload at least one image", (value) => value && value.length > 0),
+        video: Yup.mixed()
+        .required('Video file is required'),
     selectedCollections: Yup.array()
         .of(
             Yup.object().shape({

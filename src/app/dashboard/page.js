@@ -1,135 +1,144 @@
-"use client"
-import { Bar, Pie } from "react-chartjs-2";
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
-  ArcElement,
+  Title,
   Tooltip,
   Legend,
 } from "chart.js";
+import Link from "next/link";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
+import { Edit } from "iconoir-react";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
-  // Data for Bar Chart
-  const barChartData = {
-    labels: ["January", "February", "March", "April", "May", "June"],
+  const [dashboardData, setDashboardData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("/api/dashboard");
+        setDashboardData(response.data);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error.message);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (!dashboardData) {
+    return <p>Loading...</p>;
+  }
+
+  const { totalOrders, totalRevenue, paymentModes, recentOrders, ordersByMonth } = dashboardData;
+
+  // Data for Payment Modes Distribution
+  const paymentModesData = {
+    labels: paymentModes.map((mode) => mode._id),
     datasets: [
       {
-        label: "Monthly Revenue",
-        data: [3000, 4000, 3500, 5000, 4500, 6000],
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 1,
+        label: "Payment Modes Distribution",
+        data: paymentModes.map((mode) => mode.count),
+        backgroundColor: ["#4CAF50", "#FFC107", "#2196F3"],
       },
     ],
   };
 
-  const barChartOptions = {
+  const paymentModesOptions = {
     responsive: true,
     plugins: {
-      legend: { display: true, position: "top" },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
+      legend: { position: "top" },
+      title: { display: true, text: "Payment Modes Distribution" },
     },
   };
 
-  // Data for Pie Chart
-  const pieChartData = {
-    labels: ["Braclet", "Ring", "Nackels", "Bangle"],
+  // Data for Orders by Month
+  const ordersByMonthData = {
+    labels: ordersByMonth.map(
+      (entry) => `${entry._id.year}-${entry._id.month.toString().padStart(2, "0")}`
+    ),
     datasets: [
       {
-        label: "Category Distribution",
-        data: [40, 30, 20, 10],
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
+        label: "Orders by Month",
+        data: ordersByMonth.map((entry) => entry.count),
+        backgroundColor: "#42A5F5",
       },
     ],
+  };
+
+  const ordersByMonthOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: "top" },
+      title: { display: true, text: "Orders by Month" },
+    },
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-6">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Jenni's Dashboard</h1>
-        <div className="flex items-center space-x-4">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-purple-300"
-          />
-          <button className="p-2 bg-red-600 text-white rounded-lg">Search</button>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+
+      {/* Cards Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-gray-700">Total Revenue</h2>
+          <p className="text-2xl font-bold text-green-600">Rs.{totalRevenue}</p>
         </div>
-      </header>
-
-      {/* Analytics Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { title: "Total Sales", value: "Rs.50,000", color: "bg-purple-100" },
-          { title: "Orders", value: "1200", color: "bg-blue-100" },
-          { title: "Revenue", value: "Rs.35,000", color: "bg-green-100" },
-          { title: "Customers", value: "500", color: "bg-yellow-100" },
-        ].map((card, idx) => (
-          <div
-            key={idx}
-            className={`p-6 rounded-lg shadow-md ${card.color}`}
-          >
-            <h3 className="text-lg font-semibold text-gray-700">
-              {card.title}
-            </h3>
-            <p className="text-2xl font-bold text-gray-800">{card.value}</p>
-          </div>
-        ))}
-      </section>
-
-      {/* Graphs and Tables */}
-      <section className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bar Chart */}
-        <div className="p-6 bg-white rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Revenue Trends
-          </h3>
-          <Bar data={barChartData} options={barChartOptions} />
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-gray-700">Total Orders</h2>
+          <p className="text-2xl font-bold text-blue-600">{totalOrders}</p>
         </div>
+      </div>
 
-        {/* Pie Chart */}
-        <div className="p-6 bg-white rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Product Category Distribution
-          </h3>
-          <Pie data={pieChartData} />
-        </div>
-      </section>
+      <div className="grid grid-cols-2 gap-2">
+         {/* Payment Modes Chart */}
+      <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+        <Bar data={paymentModesData} options={paymentModesOptions} />
+      </div>
 
-      {/* Recent Orders Table */}
-      <section className="mt-8 p-6 bg-white rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Recent Orders
-        </h3>
-        <table className="w-full text-left">
+      {/* Orders by Month Chart */}
+      <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+        <Bar data={ordersByMonthData} options={ordersByMonthOptions} />
+      </div>
+      </div>
+      {/* Recent Orders Section */}
+      <div className="bg-white shadow-lg rounded-lg p-6">
+       <div className="flex justify-between">
+       <h2 className="text-lg font-semibold text-gray-700 mb-4">Recent Orders</h2>
+       <Link href="/dashboard/orders">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-400">
+                        <Edit className="w-5 h-5" /> Manage Orders
+                    </button>
+        </Link>
+       </div>
+        <table className="w-full table-auto border-collapse border border-gray-300">
           <thead>
-            <tr>
-              <th className="py-2 text-gray-600">Customer</th>
-              <th className="py-2 text-gray-600">Product</th>
-              <th className="py-2 text-gray-600">Price</th>
-              <th className="py-2 text-gray-600">Date</th>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 p-2">Order ID</th>
+              <th className="border border-gray-300 p-2">Customer</th>
+              <th className="border border-gray-300 p-2">Amount</th>
+              <th className="border border-gray-300 p-2">Status</th>
             </tr>
           </thead>
           <tbody>
-            {[1, 2, 3, 4].map((_, idx) => (
-              <tr key={idx} className="border-t">
-                <td className="py-2">Customer {idx + 1}</td>
-                <td>Product {idx + 1}</td>
-                <td>Rs.10000</td>
-                <td>2024-12-14</td>
+            {recentOrders.map((order) => (
+              <tr key={order._id}>
+                <td className="border border-gray-300 p-2">{order.orders[0].orderID}</td>
+                <td className="border border-gray-300 p-2">{order.orders[0].customer.name}</td>
+                <td className="border border-gray-300 p-2">Rs.{order.orders[0].amount}</td>
+                <td className="border border-gray-300 p-2">{order.orders[0].orderStatus}</td>
               </tr>
             ))}
           </tbody>
         </table>
-      </section>
+      </div>
     </div>
   );
 };

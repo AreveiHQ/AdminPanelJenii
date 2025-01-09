@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import Product, { OfflineProduct } from '@/models/productModel';
-import { uploadToCloudinary } from '@/utils/cloudinary';
 import Category from '@/models/category';
 import { connectToDB } from '@/db';
 import { uploadToS3 } from '@/utils/awsS3Bucket';
-
+import fs from 'fs';
 function calculatedDiscount(price, discountedPrice) {
   const discount = ((price - discountedPrice) / price) * 100;
   return Math.ceil(discount);
@@ -39,7 +38,10 @@ export async function POST(request) {
     const stock = formData.get('stock');
     const mode = formData.get('mode');
     const sku = formData.get('sku');
+    const vedio = formData.get('video');
     const slug = name.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
+
+    console.log(vedio,imageFiles)
 
     if (!imageFiles.length || !name || !price || !category || !subCategory) {
       return NextResponse.json({ message: 'Please fill required fields' }, { status: 400 });
@@ -58,10 +60,12 @@ export async function POST(request) {
       const fileName = `${Date.now()}-${file.name}`;
       const mimeType = file.type;
 
-      return uploadToS3(fileBuffer,"products/", fileName, mimeType);
+      return uploadToS3(fileBuffer,"products/image/", fileName, mimeType);
     });
 
     const images = await Promise.all(uploadPromises);
+    const vedioBuffer = Buffer.from(await vedio.arrayBuffer())
+const vedioUrl = await uploadToS3(vedioBuffer,"products/vedio/",`${Date.now()}-${vedio.name}`, vedio.type);
 
     // Now create and save the product in the database
     const discountPercent = calculatedDiscount(price, discountPrice);
@@ -78,6 +82,7 @@ export async function POST(request) {
         category: { name: subCategory, id: isExist._id },
         collectionName:collection,
         metal,
+        video:vedioUrl,
         stock,
         slug
       });
@@ -97,7 +102,8 @@ export async function POST(request) {
         collectionName:collection,
         metal,
         stock,
-        slug
+        slug,
+        video:vedioUrl,
       });
 
       const newProduct = await product.save();
