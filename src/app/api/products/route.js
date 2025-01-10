@@ -64,8 +64,11 @@ export async function POST(request) {
     });
 
     const images = await Promise.all(uploadPromises);
+    let vedioUrl;
+    if(vedio && vedio.type){ 
     const vedioBuffer = Buffer.from(await vedio.arrayBuffer())
-const vedioUrl = await uploadToS3(vedioBuffer,"products/vedio/",`${Date.now()}-${vedio.name}`, vedio.type);
+    vedioUrl = await uploadToS3(vedioBuffer,"products/vedio/",`${Date.now()}-${vedio.name}`, vedio.type);
+    } 
 
     // Now create and save the product in the database
     const discountPercent = calculatedDiscount(price, discountPrice);
