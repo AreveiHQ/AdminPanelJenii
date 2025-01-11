@@ -21,7 +21,7 @@ const categorySchema = mongoose.Schema({
         parentCategory:{
                 type:String,
                 required:true,
-                enum: ['men','women'],
+                enum: ['men','women','men women'],
         },
     
 })

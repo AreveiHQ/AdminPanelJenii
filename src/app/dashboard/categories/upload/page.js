@@ -11,7 +11,7 @@ const CategorySchema = Yup.object().shape({
     .required("Category name is required")
     .max(50, "Name can't exceed 50 characters"),
   parentCategory: Yup.string()
-    .oneOf(["men", "women"], "Invalid parent category")
+    .oneOf(["men", "women","men women"], "Invalid parent category")
     .required("Parent category is required"),
   bannerImages: Yup.mixed().required("At least one banner image is required"),
   image: Yup.mixed().required("Image is required"),
@@ -109,6 +109,7 @@ export default function UploadCategory() {
                 <option value="">Select a category</option>
                 <option value="men">Men</option>
                 <option value="women">Women</option>
+                <option value="men women">Both Men and Women</option>
               </select>
               {errors.parentCategory && (
                 <p className="text-red-500 text-sm">

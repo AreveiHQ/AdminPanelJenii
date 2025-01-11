@@ -36,6 +36,30 @@ export default function AddProduct() {
       stock: 0,
       metal: "silver",
       mode: "online",
+      description: `<table border="1" style=" color:#434343;border-collapse: collapse; width: 100%; text-align: left;">
+  <tbody>
+    <tr>
+      <td>Measurements</td>
+      <td>Earrings - 25 mm x 30 mm</td>
+    </tr>
+    <tr>
+      <td>Precious Metal</td>
+      <td>Silver with Platinum Plating</td>
+    </tr>
+    <tr>
+      <td>Alloy</td>
+      <td>925 Sterling Silver</td>
+    </tr>
+    <tr>
+      <td>Metal Weight</td>
+      <td>1,85 g</td>
+    </tr>
+    <tr>
+      <td>Colour</td>
+      <td>blue</td>
+    </tr>
+  </tbody>
+</table>`
     },
   });
 
@@ -63,6 +87,7 @@ export default function AddProduct() {
       trigger("images")
     }
   };
+
   const handleVideoChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -100,11 +125,11 @@ export default function AddProduct() {
 
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
+    const regex = new RegExp(`\\b${selectedCategory}\\b`, "i")
     const filteredSubCategories = categoriesData.filter(
-      (category) => category.parentCategory === selectedCategory
+      (category) => regex.test(category.parentCategory)
     );
     setSubCategories(filteredSubCategories);
-    trigger("category")
   };
 
   const onSubmit = async (data) => {
@@ -217,7 +242,20 @@ export default function AddProduct() {
                     name="description"
                     control={control}
                     render={({ field }) => (
-                      <JoditEditor value={field.value} onChange={field.onChange} />
+                      <JoditEditor value={field.value} onChange={field.onChange}  config={{
+                        
+                        readonly: false, // all options from https://xdsoft.net/jodit/docs/,
+                                          style:{
+                                                  backgroundColor:'#F6F6F6',
+                                                  color:'#f0f0f0'
+                                          },
+                                          toolbar:{
+                                                  style:{
+                                                          backgroundColor:'#F6F6F6',
+                                                  }
+                                          },
+                        placeholder: 'Write Description....'
+                      }}/>
                     )}
                   />
                   {errors.description && (
@@ -299,6 +337,9 @@ export default function AddProduct() {
                                     click to upload Vedio
                                 </p>
                             </div>
+                            {errors.video && (
+                                <p className="text-red-500 text-sm">{errors.video.message}</p>
+                            )}
                             {videoPreview && (
         <div>
           <h3>Video Preview:</h3>
@@ -310,9 +351,7 @@ export default function AddProduct() {
         </div>
       )}
                 
-                            {errors.video && (
-                                <p className="text-red-500 text-sm">{errors.video.message}</p>
-                            )}
+                          
                         </div>
               </div>
             </div>
@@ -340,7 +379,9 @@ export default function AddProduct() {
                         </option>
                       ))}
                     </select>
-                    <p className="error text-red-500 text-sm">{errors.category?.message}</p>
+                    {errors.category && (
+                                <p className="text-red-500 text-sm">{errors.category.message}</p>
+                            )}
                   </div>
 
                   {/* Sub-Category */}
@@ -358,7 +399,9 @@ export default function AddProduct() {
                         </option>
                       ))}
                     </select>
-                    <p className="error text-red-500 text-sm">{errors.subCategory?.message}</p>
+                    {errors.subCategory && (
+                                <p className="text-red-500 text-sm">{errors.subCategory.message}</p>
+                            )}
                   </div>
 
 
@@ -422,7 +465,9 @@ export default function AddProduct() {
                       placeholder="Enter stock quantity"
                       defaultValue={0}
                     />
-                    <p className="text-red-500 text-sm">{errors.stock?.message}</p>
+                      {errors.stock && (
+                                <p className="text-red-500 text-sm">{errors.stock.message}</p>
+                            )}
                   </div>
 
                   {/* Collection */}
@@ -458,7 +503,9 @@ export default function AddProduct() {
                       />
                     )}
                   />
-<p className="text-red-500 text-sm">{errors.selectedCollections?.message}</p>
+  {errors.selectedCollections && (
+                                <p className="text-red-500 text-sm">{errors.selectedCollections.message}</p>
+                            )}
 
                   </div>
 
@@ -474,7 +521,9 @@ export default function AddProduct() {
                       <option value="online">Online</option>
                       <option value="offline">Offline</option>
                     </select>
-                    <p className="text-red-500 text-sm">{errors.mode?.message}</p>
+                    {errors.mode && (
+                                <p className="text-red-500 text-sm">{errors.mode.message}</p>
+                            )}
                   </div>
 
                   {/* Metal */}
@@ -488,7 +537,9 @@ export default function AddProduct() {
                       <option value="silver">Silver</option>
                       <option value="gold">Gold</option>
                     </select>
-                    <p className="text-red-500 text-sm">{errors.metal?.message}</p>
+                    {errors.metal && (
+                                <p className="text-red-500 text-sm">{errors.metal.message}</p>
+                            )}
                   </div>
                 </div>
               </AccordionDetails>

@@ -47,7 +47,7 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Please fill required fields' }, { status: 400 });
     }
 
-    const isExist = await Category.findOne({ name: subCategory, parentCategory: category });
+    const isExist = await Category.findOne({ name: subCategory});
     if (!isExist) {
       return NextResponse.json({ message: 'Invalid Category' }, { status: 403 });
     }
@@ -82,7 +82,7 @@ export async function POST(request) {
         price,
         discountPrice,
         discountPercent,
-        category: { name: subCategory, id: isExist._id },
+        category: { name: subCategory, type:category },
         collectionName:collection,
         metal,
         video:vedioUrl,
@@ -101,7 +101,7 @@ export async function POST(request) {
         price,
         discountPrice,
         discountPercent,
-        category: { name: subCategory, id: isExist._id },
+        category:  { name: subCategory, type:category },
         collectionName:collection,
         metal,
         stock,
@@ -117,5 +117,12 @@ export async function POST(request) {
     return NextResponse.json({ message: 'Server error', error: error.message }, { status: 500 });
   }
 }
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb', // Adjust size limit as needed (e.g., 10mb)
+    },
+  },
+};
 
 
