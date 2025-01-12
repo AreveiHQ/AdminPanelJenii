@@ -14,7 +14,6 @@ import { useForm, Controller } from "react-hook-form";
 import { collectionsList } from "@/utils/data";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from 'axios';
 
 import dynamic from 'next/dynamic';
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
@@ -133,6 +132,7 @@ export default function AddProduct() {
   };
 
   const onSubmit = async (data) => {
+    console.log(data)
     try {
       setLoading(true);
       console.log('Form Submitted:', data);
@@ -241,21 +241,9 @@ export default function AddProduct() {
                   <Controller
                     name="description"
                     control={control}
+                    
                     render={({ field }) => (
-                      <JoditEditor value={field.value} onChange={field.onChange}  config={{
-                        
-                        readonly: false, // all options from https://xdsoft.net/jodit/docs/,
-                                          style:{
-                                                  backgroundColor:'#F6F6F6',
-                                                  color:'#f0f0f0'
-                                          },
-                                          toolbar:{
-                                                  style:{
-                                                          backgroundColor:'#F6F6F6',
-                                                  }
-                                          },
-                        placeholder: 'Write Description....'
-                      }}/>
+                      <JoditEditor value={field.value} onChange={field.onChange}   onBlur={field.onBlur} />
                     )}
                   />
                   {errors.description && (

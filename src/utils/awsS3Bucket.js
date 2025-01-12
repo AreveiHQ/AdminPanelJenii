@@ -18,6 +18,9 @@ export const uploadToS3 = async (fileBuffer,folder,fileName, mimeType) => {
         const upload = new Upload({
           client: s3, // Your S3 client
           params,
+          leavePartsOnError: false, // Automatically clean up parts if an error occurs
+          queueSize: 3, // Number of concurrent uploads (tune based on your needs)
+          partSize: 5 * 1024 * 1024,
         });
       
         try {
