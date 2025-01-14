@@ -16,6 +16,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import dynamic from 'next/dynamic';
+import axios from "axios";
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 const Select = dynamic(() => import('react-select'), { ssr: false });
 export default function AddProduct() {
