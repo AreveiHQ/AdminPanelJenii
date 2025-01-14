@@ -15,7 +15,7 @@ const OrdersDashboard = () => {
   // State management
   const [rowData, setRowData] = useState([]);
   const [orderCount, setOrderCount] = useState(0);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
   const gridRef = useRef();
 
   // Fetch orders from API
@@ -53,7 +53,7 @@ const OrdersDashboard = () => {
 
   // Handle Order Status Update
   const handleStatusChange = async (params, newStatus) => {
-    setLoading(true); 
+    setLoading(true);
     try {
       await axios.put(`/api/orders/${params.data.orderId}`, {
         orderStatus: newStatus,
@@ -69,7 +69,7 @@ const OrdersDashboard = () => {
       console.error("Error updating status:", error);
       alert("Failed to update status. Please try again.");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -79,6 +79,90 @@ const OrdersDashboard = () => {
       fileName: "orders.csv",
     });
   }, []);
+
+  const printOrderAddress = () => {
+    const selectedNodes = gridRef.current.api.getSelectedNodes(); // Get selected rows
+    const selectedOrders = selectedNodes.map((node) => ({
+      address: node.data.address || "N/A",
+      customerName: node.data.customerName || "N/A",
+      phone: node.data.phone || "N/A", // Add phone if available in data
+      orderItems: node.data.itemName || "N/A", // Example for single item; customize for multiple items
+    }));
+
+    if (selectedOrders.length === 0) {
+      alert("No orders selected!");
+      return;
+    }
+
+    const printWindow = window.open("Printing");
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Selected Order Details</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.5; padding: 20px; }
+            h1 { text-align: center; }
+            ul { list-style-type: none; padding: 0; }
+            li { margin-bottom: 10px; }
+            hr {
+              border: none;        
+              border-top: 2px dashed #000; 
+              margin: 10px 0;   
+            }
+      .postcard {
+        width: auto;
+        height: auto;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background: white;
+        padding: 3px;
+    }
+
+    .postcard hr {
+      border: none;
+      border-top: 1px dashed #ddd;
+    }
+
+    .address-section {
+      text-align: left;
+      font-size: 10px;
+    }
+
+          </style>
+        </head>
+        <body>
+          <h1>Selected Order Details</h1>
+          <ul>
+              ${selectedOrders
+        .map(
+          (order) => `
+                    <div class="printing">
+                    <hr>
+                    <div class="postcard">
+                        <div class="address-section">
+                          <p>To,<br>
+                            <strong>${order.customerName}</strong>,<br>
+                            ${order.address}<br>
+                          </p>
+                          <p>From,<br>
+                            <strong>Jenni Jewellery</strong><br>
+                            Thanks for shopping with us!
+                          </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div>
+                `
+        )
+        .join("")}
+           </ul>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
 
   // Get color styling for order status
   const getStatusColor = (status) => {
@@ -149,7 +233,7 @@ const OrdersDashboard = () => {
       {loading && (
         <div className="absolute inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-10">
           <div className="animate-spin">
-            <Loader  size={50} className="text-pink-400" />
+            <Loader size={50} className="text-pink-400" />
           </div>
         </div>
       )}
@@ -168,6 +252,13 @@ const OrdersDashboard = () => {
             onClick={onExportToCsv}
           >
             Export to CSV
+          </button>
+
+          <button
+            className="bg-[#F3D2DD] text-[#C52158] py-2 px-4 rounded-md"
+            onClick={printOrderAddress}
+          >
+            Print Address
           </button>
         </div>
       </div>
