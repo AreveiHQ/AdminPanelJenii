@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import * as Yup from "yup";
@@ -5,228 +6,264 @@ import { useFormik } from "formik";
 
 const EditProductForm = ({ productId, onClose }) => {
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [categoryType,setCategoryType]=useState();
+  const [categoryName,setCategoryName]=useState();
+  const calculateDiscountPercent = (price, discountPrice) =>
+    price > 0 ? ((price - discountPrice) / price) * 100 : 0;
 
-  // Formik initial values and validation schema
   const formik = useFormik({
     initialValues: {
       name: "",
+      sku: "",
+      slug: "",
       price: "",
+      discountPrice: "",
+      discountPercent: 0,
       stock: "",
-      category: "",
+      category: {},
+      subCategory: "",
+      collectionName: "",
+      metal: "",
     },
     validationSchema: Yup.object({
       name: Yup.string()
         .min(2, "Name must be at least 2 characters")
         .required("Name is required"),
+      sku: Yup.string().required("SKU is required"),
+      slug: Yup.string().required("Slug is required"),
       price: Yup.number()
         .positive("Price must be a positive number")
         .required("Price is required"),
+      discountPrice: Yup.number()
+        .positive("Discount price must be positive")
+        .required("Discount price is required"),
       stock: Yup.number()
         .integer("Stock must be an integer")
         .min(0, "Stock cannot be negative")
         .required("Stock is required"),
-      category: Yup.string().required("Category is required"),
+      category: Yup.object().required("Category is required"),
+      metal: Yup.string()
+        .oneOf(["silver", "gold", "platinum", "rose gold"])
+        .required("Metal is required"),
     }),
     onSubmit: async (values) => {
+      console.log(values);
       setLoading(true);
       try {
-        await axios.put(`/api/products/${productId}`, values);
-        alert("Product updated successfully.");
-        onClose(); // Close the form
+        const response = await axios.put(`/api/products/${productId}`, values);
+        alert("Product updated successfully!");
+        onClose();
       } catch (error) {
-        console.error("Error updating product:", error);
-        alert("An error occurred while updating the product.");
+        alert("Failed to update product.");
       } finally {
         setLoading(false);
       }
     },
   });
 
-  // Fetch product details and populate form
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
-        const response = await axios.get(`/api/products/${productId}`);
-        const product = response.data;
+        const { data } = await axios.get(`/api/products/${productId}`);
         formik.setValues({
-          name: product.name,
-          price: product.price,
-          stock: product.stock,
-          category: product.category?.name || "",
+          name: data.name,
+          sku: data.sku,
+          slug: data.slug,
+          price: data.price,
+          discountPrice: data.discountPrice,
+          discountPercent: calculateDiscountPercent(
+            data.price,
+            data.discountPrice
+          ).toFixed(2),
+          stock: data.stock,
+          category:data.category.name,
+          subCategories:data.category.type,
+          collectionName: data.collectionName.join(", "),
+          metal: data.metal,
         });
       } catch (error) {
         console.error("Error fetching product details:", error);
       }
     };
 
+    const fetchCategories = async () => {
+      try {
+        const { data } = await axios.get("/api/categories/options");
+        console.log(data)
+        setCategories(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
     fetchProductDetails();
+    fetchCategories();
   }, [productId]);
 
+  const handleCategoryChange = (e) => {
+    const selectedCategory = e.target.value;
+    //formik.setFieldValue("category", selectedCategory);
+    setCategoryType(selectedCategory);
+    const filteredSubCategories = categories.filter(
+      (category) => category.name
+    );
+    setSubCategories(filteredSubCategories);
+    console.log(filteredSubCategories)
+  };
+
+  const handleCategoryNameChange=(e)=>{
+      console.log(e.target.value);
+     const categoryNamex=e.target.value;
+     setCategoryName(categoryNamex);
+     console.log(categoryNamex);
+     formik.setFieldValue("category",{
+      "name":categoryNamex,
+      "type":categoryType
+     })
+  }
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        backgroundColor: "#CCCCFF",
-        padding: "20px",
-        borderRadius: "10px",
-        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-        width: "90%",
-        maxWidth: "500px",
-        zIndex: 1000,
-      }}
-    >
-      <h2 style={{ textAlign: "center", color: "#6a1b9a" }}>Edit Product</h2>
-      <form onSubmit={formik.handleSubmit}>
-        {/* Name Input */}
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            htmlFor="name"
-            style={{ display: "block", marginBottom: "5px", color: "#6a1b9a" }}
-          >
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formik.values.name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-            }}
-          />
-          {formik.touched.name && formik.errors.name && (
-            <p style={{ color: "red", fontSize: "12px" }}>
-              {formik.errors.name}
-            </p>
-          )}
-        </div>
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50 overflow-scroll">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
+        <h2 className="text-2xl font-bold text-pink-600 text-center mb-6">
+          Edit Product
+        </h2>
+        <form onSubmit={formik.handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[
+            { label: "Name", id: "name", type: "text" },
+            { label: "SKU", id: "sku", type: "text" },
+            { label: "Slug", id: "slug", type: "text" },
+            { label: "Price", id: "price", type: "number" },
+            { label: "Discount Price", id: "discountPrice", type: "number" },
+            { label: "Stock", id: "stock", type: "number" },
+          ].map(({ label, id, type }) => (
+            <div key={id}>
+              <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+                {label}
+              </label>
+              <input
+                type={type}
+                id={id}
+                name={id}
+                value={formik.values[id]}
+                onChange={(e) => {
+                  formik.handleChange(e);
+                  if (id === "price" || id === "discountPrice") {
+                    const discountPercent = calculateDiscountPercent(
+                      formik.values.price,
+                      formik.values.discountPrice
+                    );
+                    formik.setFieldValue("discountPercent", discountPercent.toFixed(2));
+                  }
+                }}
+                onBlur={formik.handleBlur}
+                disabled={loading}
+                className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-pink-300"
+              />
+              {formik.touched[id] && formik.errors[id] && (
+                <p className="text-sm text-red-600">{formik.errors[id]}</p>
+              )}
+            </div>
+          ))}
 
-        {/* Price Input */}
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            htmlFor="price"
-            style={{ display: "block", marginBottom: "5px", color: "#6a1b9a" }}
-          >
-            Price ($)
-          </label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={formik.values.price}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-            }}
-          />
-          {formik.touched.price && formik.errors.price && (
-            <p style={{ color: "red", fontSize: "12px" }}>
-              {formik.errors.price}
-            </p>
-          )}
-        </div>
+          {/* Category Dropdown */}
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+              Category
+            </label>
+            <select
+              id="category"
+              name="category"
+              value={formik.values.category}
+              onChange={handleCategoryChange}
+              onBlur={formik.handleBlur}
+              disabled={loading}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-pink-300"
+            >
+              <option value="" disabled>
+                Select a category
+              </option>
+              {categories.map((cat) => (
+                <option key={cat.name} value={cat.name}>
+                  {cat.parentCategory}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Stock Input */}
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            htmlFor="stock"
-            style={{ display: "block", marginBottom: "5px", color: "#6a1b9a" }}
-          >
-            Stock
-          </label>
-          <input
-            type="number"
-            id="stock"
-            name="stock"
-            value={formik.values.stock}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-            }}
-          />
-          {formik.touched.stock && formik.errors.stock && (
-            <p style={{ color: "red", fontSize: "12px" }}>
-              {formik.errors.stock}
-            </p>
-          )}
-        </div>
+          {/* Subcategory Dropdown */}
+          <div>
+            <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700">
+              Sub-Category
+            </label>
+            
+            <select
+              id="subCategory"
+              name="subCategory"
+              value={formik.values.subCategory}
+              onChange={(e)=>handleCategoryNameChange(e)}
+              onBlur={formik.handleBlur}
+              disabled={loading || !subCategories.length}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-pink-300"
+            >
+              <option value="" disabled>
+                Select a sub-category
+              </option>
+              {subCategories.map((subCat, index) => (
+                <option key={index} value={subCat.name}>
+                  {subCat.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Category Input */}
-        <div style={{ marginBottom: "15px" }}>
-          <label
-            htmlFor="category"
-            style={{ display: "block", marginBottom: "5px", color: "#6a1b9a" }}
-          >
-            Category
-          </label>
-          <input
-            type="text"
-            id="category"
-            name="category"
-            value={formik.values.category}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            style={{
-              width: "100%",
-              padding: "10px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-            }}
-          />
-          {formik.touched.category && formik.errors.category && (
-            <p style={{ color: "red", fontSize: "12px" }}>
-              {formik.errors.category}
-            </p>
-          )}
-        </div>
+          {/* Metal Dropdown */}
+          <div>
+            <label htmlFor="metal" className="block text-sm font-medium text-gray-700">
+              Metal
+            </label>
+            <select
+              id="metal"
+              name="metal"
+              value={formik.values.metal}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              disabled={loading}
+              className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-pink-300"
+            >
+              <option value="" disabled>
+                Select metal
+              </option>
+              {["silver", "gold", "platinum", "rose gold"].map((metal) => (
+                <option key={metal} value={metal}>
+                  {metal}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Buttons */}
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              backgroundColor: "#e0e0e0",
-              border: "none",
-              borderRadius: "5px",
-              padding: "10px 20px",
-              cursor: "pointer",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              backgroundColor: "#6a1b9a",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              padding: "10px 20px",
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? "Updating..." : "Update"}
-          </button>
-        </div>
-      </form>
+          {/* Buttons */}
+          <div className="col-span-2 flex justify-end space-x-4 mt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 focus:ring"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 focus:ring"
+            >
+              {loading ? "Updating..." : "Update"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

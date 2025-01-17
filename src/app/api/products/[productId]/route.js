@@ -4,7 +4,7 @@ import { connectToDB } from '@/db';  // Assuming you have a separate DB connecti
 
 // GET request to fetch a product by ID
 export async function GET(req, { params }) {
-    const { productId } = params;
+    const { productId } = await params;
 
     try {
         await connectToDB();  // Connect to the database
@@ -26,9 +26,10 @@ export async function PUT(req, { params }) {
     const updatedData = await req.json();
 
     try {
-        await connectToDB();  // Connect to the database
+        await connectToDB(); 
 
-        const updatedProduct = await Product.findByIdAndUpdate(productId, updatedData, { new: true });  // Update product in the database
+        const updatedProduct = await Product.findByIdAndUpdate(productId, updatedData, { new: true });  
+        console.log(updatedProduct);
         if (!updatedProduct) {
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });
         }
