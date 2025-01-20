@@ -18,6 +18,7 @@ const ProductTable = () => {
       const response = await fetch("/api/products");
       if (!response.ok) throw new Error("Failed to fetch products");
       const data = await response.json();
+      console.log(data)
       setRowData(data.products);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -157,7 +158,7 @@ const ProductTable = () => {
             rowData={rowData}
             columnDefs={columnDefs}
             pagination={true}
-            paginationPageSize={10}
+            paginationPageSize={12}
             defaultColDef={{
               sortable: true,
               filter: true,

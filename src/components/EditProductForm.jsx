@@ -105,9 +105,10 @@ const EditProductForm = ({ productId, onClose }) => {
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
     //formik.setFieldValue("category", selectedCategory);
+    const regex = new RegExp(`\\b${selectedCategory}\\b`, "i")
     setCategoryType(selectedCategory);
     const filteredSubCategories = categories.filter(
-      (category) => category.name
+      (category) => regex.test(category.name)
     );
     setSubCategories(filteredSubCategories);
     console.log(filteredSubCategories)
