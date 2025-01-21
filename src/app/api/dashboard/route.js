@@ -1,5 +1,6 @@
 import { connectToDB } from "@/db";
 import Order from "@/models/orderModel";
+import Product from "@/models/productModel";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -7,6 +8,7 @@ export async function GET() {
 
   try {
     
+    const totalproducts = await Product.countDocuments();
     const totalOrders = await Order.aggregate([
       { $unwind: "$orders" },
       { $count: "totalOrders" },
@@ -55,6 +57,7 @@ export async function GET() {
     console.log(ordersByMonth);
 
     return NextResponse.json({
+      totalproducts,
       totalOrders:totalOrders[0].totalOrders,
       totalRevenue:totalRevenue[0].total,
       recentOrders,

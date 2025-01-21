@@ -1,44 +1,40 @@
-"use client"
-import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react"
-import { signOut, useSession } from "next-auth/react"
+
+import {  ChevronLast, ChevronFirst } from "lucide-react"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { useContext, createContext, useState, useEffect } from "react"
 
 const SidebarContext = createContext()
 
-export default function Sidebar({ children }) {
-  const [expanded, setExpanded] = useState(true)
-  const {data} = useSession();
-  useEffect(()=>{
-    console.log(data)
-  },[data])
+export default function Sidebar({expanded ,children }) {
+  
+ 
   return (
     <aside className="h-screen sticky top-0">
       <nav className="h-full flex flex-col bg-white border-r shadow-sm">
-        <div className="p-4 pb-2 flex justify-between items-center">
+        <div className="p-4 pb-2 flex justify-between items-center ">
           <Image
-           width={80}
-           height={30}
-            src="/jenii.png"
-            className={`overflow-hidden transition-all ${
+           width={400}
+           height={150}
+            src="/jenii-logo.png"
+            className={`overflow-hidden transition-all mx-auto ${
               expanded ? "w-32" : "w-0"
             }`}
             alt=""
           />
-          <button
+          {/* <button
             onClick={() => setExpanded((curr) => !curr)}
             className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
           >
             {expanded ? <ChevronFirst /> : <ChevronLast />}
-          </button>
+          </button> */}
         </div>
 
         <SidebarContext.Provider value={{ expanded }}>
           <ul className="flex-1 px-3">{children}</ul>
         </SidebarContext.Provider>
 
-        {data && <div className="border-t flex p-3">
+        {/* {data && <div className="border-t flex p-3">
           <div
             className="w-10 h-10 rounded-md bg-[rgba(196,30,86,1)] text-white  font-extrabold flex justify-center items-center text-xl"
 
@@ -55,7 +51,7 @@ export default function Sidebar({ children }) {
             </div>
             <MoreVertical size={20} />
           </div>
-        </div>}
+        </div>} */}
       </nav>
     </aside>
   )
@@ -112,10 +108,4 @@ export function SidebarItem({ icon, text, alert, path}) {
   )
 }
 
-export  function SignOutButton() {
-  return (
-            <button className="px-4 py-2 text-sm font-medium text-[rgba(196,30,86,1)] bg-[rgba(196,30,86,0.2)] rounded hover:bg-[rgba(196,30,86,0.2)]" onClick={()=>signOut()}>
-              Logout
-            </button>
-  )
-}
+

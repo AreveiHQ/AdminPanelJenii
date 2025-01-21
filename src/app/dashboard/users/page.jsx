@@ -59,7 +59,7 @@ export default function Users() {
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
   return (
-    <div className="">
+    <div className="p-2 sm:px-5 sm:py-4">
      <h2 className="text-xl mb-2 font-semibold text-gray-700">
           All Users{" "}
           <span className="text-pink-500">({users.length})</span>

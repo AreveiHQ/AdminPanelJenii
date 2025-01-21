@@ -37,15 +37,15 @@ const Dashboard = () => {
     return <p>Loading...</p>;
   }
 
-  const { totalOrders, totalRevenue, paymentModes, recentOrders, ordersByMonth } = dashboardData;
+  const { totalproducts,totalOrders, totalRevenue, paymentModes, recentOrders, ordersByMonth } = dashboardData;
 
   // Data for Payment Modes Distribution
   const paymentModesData = {
-    labels: paymentModes.map((mode) => mode._id),
+    labels: paymentModes?.map((mode) => mode._id),
     datasets: [
       {
         label: "Payment Modes Distribution",
-        data: paymentModes.map((mode) => mode.count),
+        data: paymentModes?.map((mode) => mode.count),
         backgroundColor: ["#4CAF50", "#FFC107", "#2196F3"],
       },
     ],
@@ -61,13 +61,13 @@ const Dashboard = () => {
 
   // Data for Orders by Month
   const ordersByMonthData = {
-    labels: ordersByMonth.map(
+    labels: ordersByMonth?.map(
       (entry) => `${entry._id.year}-${entry._id.month.toString().padStart(2, "0")}`
     ),
     datasets: [
       {
         label: "Orders by Month",
-        data: ordersByMonth.map((entry) => entry.count),
+        data: ordersByMonth?.map((entry) => entry.count),
         backgroundColor: "#42A5F5",
       },
     ],
@@ -82,38 +82,69 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-
+    <div className="p-6  min-h-screen">
       {/* Cards Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-700">Total Revenue</h2>
-          <p className="text-2xl font-bold text-green-600">Rs.{totalRevenue}</p>
-        </div>
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-gray-700">Total Orders</h2>
-          <p className="text-2xl font-bold text-blue-600">{totalOrders}</p>
-        </div>
-      </div>
+     
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div
+            className="p-6 rounded-lg shadow-sm bg-white border border-gray-200 flex items-center justify-between"
+          >
+            <div>
+              <h3 className="text-sm font-medium text-gray-600">
+              Total Revenue
+              </h3>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+              Rs.{totalRevenue}
+              </p>
+            </div>
+            <img className="w-12 h-12" src="/coupon.png" alt="coupon" />
+          </div>
+      <div
+            className="p-6 rounded-lg shadow-sm bg-white border border-gray-200 flex items-center justify-between"
+          >
+            <div>
+              <h3 className="text-sm font-medium text-gray-600">
+              Total Products
+              </h3>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+              {totalproducts}
+              </p>
+            </div>
+            <img className="w-12 h-12" src="/coupon.png" alt="coupon" />
+          </div>
+      <div
+            className="p-6 rounded-lg shadow-sm bg-white border border-gray-200 flex items-center justify-between"
+          >
+            <div>
+              <h3 className="text-sm font-medium text-gray-600">
+              Total Orders
+              </h3>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+              {totalOrders}
+              </p>
+            </div>
+            <img className="w-12 h-12" src="/coupon.png" alt="coupon" />
+          </div>
+   
+      </section>
 
       <div className="grid grid-cols-2 gap-2">
          {/* Payment Modes Chart */}
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <Bar data={paymentModesData} options={paymentModesOptions} />
       </div>
 
       {/* Orders by Month Chart */}
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <Bar data={ordersByMonthData} options={ordersByMonthOptions} />
       </div>
       </div>
       {/* Recent Orders Section */}
-      <div className="bg-white shadow-lg rounded-lg p-6">
+      <div className="bg-white shadow-md rounded-lg ">
        <div className="flex justify-between">
        <h2 className="text-lg font-semibold text-gray-700 mb-4">Recent Orders</h2>
        <Link href="/dashboard/orders">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-400">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-400 mb-2">
                         <Edit className="w-5 h-5" /> Manage Orders
                     </button>
         </Link>
@@ -128,7 +159,7 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {recentOrders.map((order) => (
+            {recentOrders?.map((order) => (
               <tr key={order._id}>
                 <td className="border border-gray-300 p-2">{order.orders[0].orderID}</td>
                 <td className="border border-gray-300 p-2">{order.orders[0].customer.name}</td>

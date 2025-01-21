@@ -78,7 +78,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <div className="p-2 sm:p-4">
       <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-md mb-4">
         <h3 className="text-lg font-semibold text-gray-700">
           Admin Users <span className="text-pink-500">({adminCount})</span>
@@ -205,6 +205,6 @@ export default function App() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
