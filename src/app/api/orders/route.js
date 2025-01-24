@@ -12,8 +12,8 @@ export async function GET(request) {
 
   
     const orders = await Order.find()
-      .populate("userId", "name")
-      .populate("orders.items.productId", "name")
+      // .populate("userId", "name")
+      // .populate("orders.items.productId", "name")
       .sort({ [sortBy]: order })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -30,6 +30,7 @@ export async function GET(request) {
       },
     });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.log(err)
+    return NextResponse.json({ error: err.message });
   }
 }
