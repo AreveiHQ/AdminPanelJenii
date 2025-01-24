@@ -318,7 +318,7 @@ export default function CouponsPage() {
                   className="w-full border border-gray-300 p-2 rounded-lg"
                 >
                   <option value="percentage">Percentage</option>
-                  <option value="flat">Flat</option>
+                  <option value="fixed">Flat</option>
                 </select>
                 {errors.discountType && (
                   <p className="text-red-500 text-sm">

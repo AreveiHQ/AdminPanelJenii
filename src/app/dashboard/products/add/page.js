@@ -36,15 +36,15 @@ export default function AddProduct() {
       stock: 0,
       metal: "silver",
       mode: "online",
-      description: `<table border="1" style=" color:#434343;border-collapse: collapse; width: 100%; text-align: left;">
+      description: `
+<h2> Description </h2>
+<p style="width:100%" >this is description</p>
+      <table border="1" style=" color:#434343;border-collapse: collapse; width: 100%; text-align: left;">
   <tbody>
+ 
     <tr>
       <td>Measurements</td>
       <td>Earrings - 25 mm x 30 mm</td>
-    </tr>
-    <tr>
-      <td>Precious Metal</td>
-      <td>Silver with Platinum Plating</td>
     </tr>
     <tr>
       <td>Alloy</td>
@@ -192,6 +192,7 @@ export default function AddProduct() {
             <div className="bg-white shadow rounded-lg p-4">
               <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <h2 className="text-xl font-semibold">Add Product</h2>
+                
                 <div className="flex space-x-2">
                   <button
                     type="button"
@@ -245,7 +246,7 @@ export default function AddProduct() {
                     control={control}
                     
                     render={({ field }) => (
-                      <JoditEditor value={field.value} onChange={field.onChange}   onBlur={field.onBlur} />
+                      <JoditEditor value={field.value}   onBlur={field.onBlur} />
                     )}
                   />
                   {errors.description && (
