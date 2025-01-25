@@ -2,9 +2,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useForm, Controller } from "react-hook-form";
-import JoditEditor from "jodit-react";
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import dynamic from "next/dynamic";
 
 const EditProductForm = ({ productId, onClose }) => {
   const [loading, setLoading] = useState(false);
@@ -218,7 +219,7 @@ const EditProductForm = ({ productId, onClose }) => {
               render={({ field }) => (
                 <JoditEditor
                   value={field.value}
-                  onChange={(newValue) => field.onChange(newValue)}
+                  onChange={field.onChange}
                   onBlur={field.onBlur} 
                   className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-pink-300"
                 />
