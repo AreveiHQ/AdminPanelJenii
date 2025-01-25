@@ -219,6 +219,7 @@ const EditProductForm = ({ productId, onClose }) => {
                 <JoditEditor
                   value={field.value}
                   onChange={(newValue) => field.onChange(newValue)}
+                  onBlur={field.onBlur} 
                   className="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-pink-300"
                 />
               )}
