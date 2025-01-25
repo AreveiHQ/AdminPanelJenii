@@ -246,7 +246,7 @@ export default function AddProduct() {
                     control={control}
                     
                     render={({ field }) => (
-                      <JoditEditor value={field.value}   onBlur={field.onBlur} />
+                      <JoditEditor value={field.value} onChange={(newValue) => field.onChange(newValue)}   onBlur={field.onBlur} />
                     )}
                   />
                   {errors.description && (
