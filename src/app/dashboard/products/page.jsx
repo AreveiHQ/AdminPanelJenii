@@ -45,12 +45,12 @@ const ProductTable = () => {
     if (confirmDelete) {
       try {
         const response = await fetch(`/api/products/${id}`, {
-          method: "DELETE",
+          method: "POST",
         });
         if (response.ok) {
-          setRowData((prevData) =>
-            prevData.filter((product) => product.id !== id)
-          );
+          // setRowData((prevData) =>
+          //   prevData.filter((product) => product.id !== id)
+          // );
           alert("Product deleted successfully.");
         } else {
           throw new Error("Failed to delete product.");
@@ -124,11 +124,16 @@ const ProductTable = () => {
             }}
             onClick={() => {
               // console.log("Editing Product ID:", params.data._id);
-              setEditingProductId(params.data._id)}}
+              setEditingProductId(params.data._id)
+             
+            }}
           >
             ✏️ Edit
           </button>
-          <button
+          {
+            params.data?.isActive?
+            <>
+              <button
             style={{
               backgroundColor: "transparent",
               border: "none",
@@ -139,9 +144,39 @@ const ProductTable = () => {
           >
             🗑️ Delete
           </button>
+            </>:
+            <button
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              cursor:"no-drop",
+              color: "gray",
+            }}
+            disabled
+          >
+            🗑️ Delete
+          </button>
+            
+          }
         </div>
       ),
-    },
+    },{
+      headerName: "Activation",
+      field: "isActive",
+      cellRenderer: (params) => {
+        const isActive = params.data?.isActive;
+        return (
+          <span
+            style={{
+              color: isActive ? "green" : "red",
+              fontWeight: "bold",
+            }}
+          >
+            {isActive ? "Active" : "Not Active"}
+          </span>
+        );
+      },
+    }    
   ];
 
   return (

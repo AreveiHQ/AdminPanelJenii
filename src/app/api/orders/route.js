@@ -13,7 +13,7 @@ export async function GET(request) {
   
     const orders = await Order.find()
       // .populate("userId", "name")
-      // .populate("orders.items.productId", "name")
+      .populate("orders.items.productId", "name")
       .sort({ [sortBy]: order })
       .skip((page - 1) * limit)
       .limit(limit);

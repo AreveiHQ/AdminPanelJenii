@@ -41,14 +41,14 @@ export async function PUT(req, { params }) {
 }
 
 // DELETE request to delete a product by ID
-export async function DELETE(req, { params }) {
-    const { productId } = params;
+export async function POST(req, { params }) {
+    const { productId } = await params;
 
     try {
         await connectToDB();  // Connect to the database
 
-        const deletedProduct = await Product.findByIdAndDelete(productId);  // Delete product from database
-        if (!deletedProduct) {
+        const UpadtedProduct = await Product.findByIdAndUpdate(productId,{isActive:false},{new:true});  // Update product into database
+        if (!UpadtedProduct) {
             return NextResponse.json({ message: 'Product not found' }, { status: 404 });
         }
         return NextResponse.json({ message: 'Product deleted successfully' }, { status: 200 });

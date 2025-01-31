@@ -320,100 +320,79 @@ export default OrdersDashboard;
 
 const generateInvoice = (order) => {
   const doc = new jsPDF();
+  const logo = "https://i.ibb.co/9kv37Y9n/Jenii-Logo.png"; 
+  doc.addImage(logo, "PNG", 20, 10, 30, 30);
 
-  // Business Name and Logo
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
-  doc.text("Jenii Jewellery", 20, 20);
+  doc.text("Jenii Jewellery", 60, 20);
   doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
-  doc.text("Vadodara, Gujarat, India", 20, 30);
-  doc.text("Email: jenii@gmail.com | Phone: +123-456-7890", 20, 40);
+  doc.text("Vadodara, Gujarat, India", 60, 30);
+  doc.text("Email: jenii@gmail.com | Phone: +123-456-7890", 60, 40);
 
-  // Horizontal Line
   doc.setLineWidth(0.5);
-  doc.line(20, 45, 190, 45);
+  doc.line(20, 50, 190, 50);
 
-  {console.log(order)}
-
-  // Invoice Title and Date
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.text("INVOICE", 150, 20);
-  
+  doc.text("TAX INVOICE", 150, 20);
   doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
-  const currentDate = new Date().toLocaleString("en-IN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-  doc.text(`Date: ${currentDate}`, 150, 30);
-  doc.text(`Invoice No: ${order.orderId}`, 150, 40);
+  const currentDate = new Date().toLocaleDateString("en-IN");
+  doc.text(`Invoice No: ${order.orderId}`, 150, 30);
+  doc.text(`Date: ${currentDate}`, 160, 40);
 
-  // "From" and "To" Sections
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("From:", 20, 55);
+  doc.text("Sold By:", 20, 60);
   doc.setFont("helvetica", "normal");
-  doc.text("Jenii Jewellery", 20, 65);
-  doc.text("Vadodara, Gujarat, India", 20, 75);
+  doc.text("Jenii Jewellery", 20, 70);
+  doc.text("Vadodara, Gujarat, India", 20, 80);
+  doc.text("GST No: 09AAJCC9783E1Z5", 20, 90);
 
   doc.setFont("helvetica", "bold");
-  doc.text("To:", 100, 55);
+  doc.text("Billing Address:", 100, 60);
   doc.setFont("helvetica", "normal");
-  doc.text(`${order.customerName}`, 100, 65);
-  const addressLines = doc.splitTextToSize(order.address, 70); // Adjust 70 to set the maximum width
-  doc.text(addressLines, 100, 70);
+  doc.text(`${order.customerName}`, 100, 70);
+  const addressLines = doc.splitTextToSize(order.address, 80);
+  doc.text(addressLines, 100, 80);
 
-  // Horizontal Line
-  doc.line(20, 85, 190, 85);
-
-  // Order Details Table Header
-  doc.setFontSize(12);
+  doc.line(20, 110, 190, 110);
   doc.setFont("helvetica", "bold");
-  doc.text("Description", 20, 95);
-  doc.text("Quantity", 110, 95);
-  doc.text("Price", 140, 95);
-  doc.text("Total", 170, 95);
-  doc.line(20, 100, 190, 100);
+  doc.text("Description", 20, 120);
+  doc.text("Unit Price", 110, 120);
+  doc.text("Qty", 140, 120);
+  doc.text("Total", 170, 120);
+  doc.line(20, 125, 190, 125);
 
-  // Single Item Details
-  let currentY = 110;
+  let currentY = 135;
   doc.setFont("helvetica", "normal");
   doc.text(order.itemName, 20, currentY);
-  doc.text(`${order.items}`, 115, currentY, { align: "right" });
-  doc.text(`${order.total}`, 145, currentY, { align: "right" });
-  doc.text(`${(order.total)}`, 175, currentY, { align: "right" });
+  doc.text(`${order.total}`, 115, currentY, { align: "right" });
+  doc.text(`${order.items}`, 145, currentY, { align: "right" });
+  doc.text(`${order.total}`, 175, currentY, { align: "right" });
+  currentY += 10;
 
-  // Table Footer with Subtotal, Tax, and Total
-  currentY += 20;
-  doc.setLineWidth(0.2);
   doc.line(20, currentY, 190, currentY);
   currentY += 10;
-  doc.setFont("helvetica", "normal");
   doc.text("Subtotal:", 140, currentY);
   doc.text(`${order.total}`, 180, currentY, { align: "right" });
   currentY += 10;
-  doc.text("Payment Type):", 140, currentY);
-  doc.text(`${order.paymentStatus}`, 190, currentY, { align: "right" });
+  doc.text("Tax (18% GST):", 140, currentY);
+  doc.text(`${order.tax||"18%"}`, 187, currentY, { align: "right" });
   currentY += 10;
-  doc.text("Total:", 140, currentY);
   doc.setFont("helvetica", "bold");
+  doc.text("Total:", 140, currentY);
   doc.text(`${order.total}`, 175, currentY, { align: "right" });
 
-  // Horizontal Line
-  currentY += 10;
-  doc.line(20, currentY, 190, currentY);
-
-  // Footer Message
   currentY += 20;
   doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
-  doc.text("Thank you for shopping with us!", 20, currentY);
-  doc.text("For any queries, please contact our customer support.", 20, currentY + 10);
+  doc.text("Thank you for your purchase!", 20, currentY);
+  doc.text("For any queries, please contact customer support.", 20, currentY + 10);
   doc.setFontSize(9);
-  doc.text("Developed & Maintain by www.arevei.com", 20, currentY + 20);
+  doc.text("Developed & Maintained by www.arevei.com", 20, currentY + 20);
 
-  // Save the PDF
   doc.save(`Invoice_${order.orderId}.pdf`);
 };
