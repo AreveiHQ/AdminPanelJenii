@@ -25,7 +25,8 @@ export default function CouponsPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
+  const [showEdit, setShowEdit] = useState(false);
+  const [editCoupon, setEditCoupon] = useState(null);
 
   
   const filteredCoupons = coupons.filter((coupon) => {
@@ -43,6 +44,7 @@ export default function CouponsPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(CouponSchema),
@@ -110,6 +112,63 @@ export default function CouponsPage() {
       console.error("Error creating coupon:", error);
     }
   };
+
+  const handleEditClick = (coupon) => {
+    setEditCoupon(coupon);
+    setShowEdit(true);
+    console.log(coupon);
+    setValue("code", coupon.code);
+    setValue("discountType", coupon.discountType);
+    setValue("discountValue", coupon.discountValue);
+    setValue("minimumOrderValue", coupon.minimumOrderValue);
+    setValue("usageLimit", coupon.usageLimit);
+    setValue("validUntil", coupon.validUntil);
+  };
+
+  const onUpdate = async (data) => {
+    try {
+      const response = await fetch(`/api/coupons/${editCoupon._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) throw new Error("Failed to update coupon.");
+
+      const updatedCoupon = await response.json();
+      console.log(updatedCoupon);
+
+      setCoupons((prevCoupons) =>
+        prevCoupons.map((coupon) =>
+          coupon._id === updatedCoupon._id ? updatedCoupon : coupon
+        )
+      );
+
+      setShowEdit(false);
+      setEditCoupon(null);
+      reset();
+    } catch (error) {
+      console.error("Error updating coupon:", error);
+    }
+  };
+
+  const handleDelete = async (coupon) => {
+      if(!confirm("Are you sure you want to delete this coupon?")){
+          return;
+      }
+    try {
+      const response = await fetch(`/api/coupons/${coupon._id}`, {
+        method:"DELETE"});
+
+      if (!response.ok) throw new Error("Failed to delete coupon.");
+
+      alert("Coupon deleted Sucessfully");
+
+      }
+    catch(err){
+        console.error("Error deleting coupon:", err);
+    }
+  }
 
 
   return (
@@ -249,8 +308,8 @@ export default function CouponsPage() {
                   </span>
                 </td>
                 <td className="px-6 py-3 flex items-center gap-2">
-                  <button>Edit</button>
-                  <button>Delete</button>
+                  <button  onClick={() => handleEditClick(coupon)}>Edit</button>
+                  <button onClick={()=> handleDelete(coupon)}>Delete</button>
                 </td>
               </tr>
             ))}
@@ -373,7 +432,7 @@ export default function CouponsPage() {
               <div className="flex justify-between items-center mt-4">
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => setShowEdit(true)}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg"
                 >
                   Cancel
@@ -387,6 +446,53 @@ export default function CouponsPage() {
               </div>
             </div>
           </form>
+        </div>
+      )}
+
+{showEdit && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Edit Coupon
+            </h3>
+            <form onSubmit={handleSubmit(onUpdate)}>
+              
+              <div className="mb-4">
+                <label className="block text-sm text-gray-600">Valid Until</label>
+                <input {...register("validUntil")} type="date" className="w-full p-2 border rounded" />
+                <p className="text-red-500 text-xs">{errors.validUntil?.message}</p>
+              </div>
+
+              <div className="mb-4">
+              <label className="block text-sm text-gray-600">Usage Limit</label>
+                <input {...register("usageLimit")} type="number" className="w-full p-2 border rounded" />
+                <p className="text-red-500 text-xs">{errors.usageLimit?.message}</p>
+              </div>
+
+              
+              <div className="mb-4">
+              <label className="block text-sm text-gray-600">Minimum Order Value</label>
+                <input {...register("minimumOrderValue")} type="number" className="w-full p-2 border rounded" />
+                <p className="text-red-500 text-xs">{errors.minimumOrderValue?.message}</p>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEdit(false)}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-pink-500 text-white rounded-lg"
+                >
+                  Update
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
