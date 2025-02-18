@@ -23,6 +23,10 @@ const categorySchema = mongoose.Schema({
                 required:true,
                 enum: ['men','women','men women'],
         },
+        discountOffer:{
+                type:Number,
+                default:0
+        }
     
 })
 
