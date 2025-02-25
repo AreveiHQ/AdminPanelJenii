@@ -4,7 +4,15 @@ import Home from "@/models/homePageModel";
 import { uploadToS3 } from "@/utils/awsS3Bucket";
 import { NextResponse } from "next/server";
 
-
+export async function GET() {
+    await connectToDB();
+    try {
+      const slides = await Home.find();
+      return NextResponse.json(slides, { status: 200 });
+    } catch (err) {
+      return NextResponse.json({ message: err.message }, { status: 500 });
+    }
+  }
 export async function POST(req) {
     await connectToDB();
     try {
@@ -38,3 +46,4 @@ export async function POST(req) {
         return NextResponse.json({ message: err.message,error:err }, { status: 500 });
     }
 }
+
