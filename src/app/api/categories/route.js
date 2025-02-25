@@ -12,12 +12,13 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const name = formData.get('name').toLowerCase();
-    const banners = formData.getAll('bannerImages');
-    const imageFile = formData.get('image');
+    const banners = formData.getAll('bannerImages')||null;
+    const imageFile = formData.get('image') ||null;
     const parentCategory = formData.get('parentCategory').toLowerCase();
+    const discountOffer = formData.get('discountOffer') || 0;
     // Check if category already exists
 
-    console.log( banners , imageFile)
+    // console.log( banners , imageFile)
     const isExist = await Category.findOne({ name });
     if (isExist && isExist.parentCategory === parentCategory) {
       return NextResponse.json({ message: 'Category Already Exists' }, { status: 403 });
@@ -42,6 +43,7 @@ export async function POST(request) {
       bannerImages,
       image,
       parentCategory,
+      discountOffer,
     });
 
     // Save the category to the database

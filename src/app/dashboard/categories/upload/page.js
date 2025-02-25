@@ -3,8 +3,10 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import axios from "axios";
+import { Button } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const CategorySchema = Yup.object().shape({
   name: Yup.string()
@@ -15,6 +17,7 @@ const CategorySchema = Yup.object().shape({
     .required("Parent category is required"),
   bannerImages: Yup.mixed().required("At least one banner image is required"),
   image: Yup.mixed().required("Image is required"),
+  discountOffer: Yup.number().min(0, "Discount can't be negative"),
 });
 
 export default function UploadCategory() {
@@ -31,6 +34,8 @@ export default function UploadCategory() {
     resolver: yupResolver(CategorySchema),
   });
 
+  const router =useRouter();
+
   const onSubmit = async (data) => {
     console.log(data)
     setIsSubmitting(true);
@@ -38,6 +43,7 @@ export default function UploadCategory() {
     formData.append("name", data.name);
     formData.append("parentCategory", data.parentCategory);
     formData.append("image", data.image[0]);
+    formData.append("discountOffer", data.discountOffer);
 
     // Append all selected banner images to the form data
     Array.from(data.images).forEach((file) => {
@@ -98,6 +104,22 @@ export default function UploadCategory() {
                 <p className="text-red-500 text-sm">{errors.name.message}</p>
               )}
             </div>
+
+            {/* Discount Offer */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium">Discount Offer</label>
+              <input
+                type="number"
+                {...register("discountOffer")}
+                className="w-full px-3 py-2 border rounded-md"
+                placeholder="Only percentage value"
+              />
+              {errors.discountOffer && (
+                <p className="text-red-500 text-sm">
+                  {errors.discountOffer.message}
+                </p>
+              )}
+              </div>
 
             {/* Parent Category */}
             <div className="mb-4">
